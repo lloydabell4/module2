@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 #install.packages("socviz")
 library(socviz)
 library(tidyverse)
-gs_data <- gss_sm
+gss_data <- gss_sm
 ggplot(data = gss_data, mapping = aes(x = bigregion)) +
   geom_bar(mapping = aes(y = ..prop.., group = 1))
 ```
