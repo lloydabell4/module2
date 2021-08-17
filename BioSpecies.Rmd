@@ -1,0 +1,161 @@
+---
+title: "Species"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+#Set up Code
+This code loads the data into the dataframe "bio" and ggplot2 library into your workspace
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE)
+bio <- read.csv("surveys_complete.csv", stringsAsFactors=FALSE)
+library(ggplot2)
+```
+
+###Summary of Data
+We will be doing much more in describing data next week. For now, understand the functions summary() and str()
+```{r Summary of Data }
+summary(bio)
+str(bio)
+```
+
+# Visualizing Data with ggplots
+For this section, you are asked to create a number of different plots. Copy and paste as little as possible - particularly if you are brand new to coding, writing out the code can help you get the feel for the commands. 
+
+###Basic Scatterplot
+Create scatterplot that maps weight to the x-axis and hindfoot_length to the y-axis
+```{r Scatterplot length vs weight }
+ggplot(bio, aes(x = weight, y = hindfoot_length)) +
+  geom_point()
+```
+
+###Add Jitter to reduce over-plotting
+Take the same scatterplot as above and add a little jitter to the points to increase visability of the distribution
+```{r Scatterplot length vs weight with jitter }
+ggplot(bio, aes(weight, hindfoot_length)) +
+  geom_point(position = position_jitter())
+```
+
+###Add Color Aesthetic Based on Species
+Map color to species_id
+
+```{r Scatterplot length vs weight with jitter by species }
+ggplot(bio, aes(weight, hindfoot_length, color = species_id)) +
+  geom_point(position = position_jitter())
+```
+
+###Change Transparency
+Another way of aiding the visability of your points is to change the transparency.  
+```{r Scatterplot length vs weight with jitter by color reduced transparency }
+ggplot(bio, aes(weight, hindfoot_length, color = species_id)) +
+  geom_point(alpha = 0.3, position = position_jitter())
+```
+
+###Add curves of best fit (linear) to better visualize relationship between length and weight for each species
+Now lets add a statistical transformation that adds a curve of best fit (lets use a linear fit rather than the default model)
+```{r linear fit }
+ggplot(bio, aes(weight, hindfoot_length, colour = species_id)) +
+  geom_point(alpha = 0.3,  position = position_jitter()) +
+  geom_smooth(alpha = 0.3, method = lm)
+```
+
+###Does the order of your geometric objects matter? 
+What happens when you remove the color aesthetic? Change the order of the geom_smooth & geom_point? Why do you think this happens?
+```{r order matter }
+ggplot(bio, aes(weight, hindfoot_length)) +
+  geom_point(alpha = 0.3,  position = position_jitter()) +
+  geom_smooth(alpha = 0.3, method = lm)
+```
+
+###Focus on a single species
+Let's say you only want to view a single species on this scattorplot. Use the function: subset(dataframe, variablename == "value")
+```{r focus on single species }
+ggplot(subset(bio, species_id == "PF"), aes(weight, hindfoot_length, colour = species_id)) +
+  geom_point(alpha = 0.3,  position = position_jitter()) +
+  geom_smooth(alpha = 0.3, method = lm)
+```
+
+###Visualize only lengths between 5-25
+Say you want to limit the y axis - here change the y axis to 5 to 25
+```{r y axis limit }
+ggplot(subset(bio, species_id == "PF"), aes(weight, hindfoot_length, colour = species_id)) +
+  geom_point(alpha = 0.3,  position = position_jitter()) +
+  geom_smooth(alpha = 0.3, method = lm) +
+  coord_cartesian(ylim = c(5,25))
+```
+
+###Add a Theme
+You can format your plot to specific themes. Look at them here: https://ggplot2.tidyverse.org/reference/ggtheme.html
+
+```{r add a theme }
+ggplot(bio, aes(weight, hindfoot_length, colour = species_id)) +
+  geom_point(alpha = 0.3,  position = position_jitter()) +
+  geom_smooth(alpha = 0.3, method = lm) +
+  theme_dark()
+```
+
+#Creating Boxplots
+###Creating a Basic Boxplot
+Boxplots are a good way to display the distribution of data based on a five number summary (minimum, 1st quartile, median, 3rd quartile, and maximum). It can also show you where your outliers are. Create a boxplot that maps weight to the y axis and species_id to the x axis. 
+
+```{r boxplot }
+ggplot(bio, aes(x = species_id, y = weight)) +
+  geom_boxplot()
+```
+
+###Ways to better visualize data on a boxplot
+Let's add points to the boxplot (make sure you jitter the position to best visualize them) and flip the axis for a more pleasing aesthetic 
+
+```{r adding points }
+ggplot(bio, aes(x = species_id, y = weight)) +
+  geom_point(alpha = 0.3, color = "tomato", position = "jitter") +
+  geom_boxplot(alpha = 0) +
+  coord_flip()
+```
+
+###Create Violin plot for hindfoot_length, change color of the points, flip the coordinates. 
+Violin plots are another good way at the distribution of your data. A violin plot adds the ability to show the probability density of the data at different values (rotated histogram). Adding a jitter plot of the data doesn't hurt either. 
+
+```{r subset violin plot }
+ggplot(subset(bio, species_id %in% c("DO", "DM", "DS")), aes(x = species_id, y = hindfoot_length, fill=species_id)) +
+  geom_jitter(shape=16, position = position_jitter(0.2)) +
+  geom_violin(trim=FALSE) +
+  facet_wrap(~ year, nrow=4)
+```
+
+###Facet across year
+Let's look at this distribution across year. Let's add a facet wrap to map year to the plot. The polynomial distribution in the above plot is likely due to what?
+
+```{r facet across year, fig.height=15 }
+ggplot(subset(bio, species_id %in% c("DO", "DM", "DS")), aes(x = species_id, y = hindfoot_length, fill=species_id)) +
+  geom_jitter(shape=16, position = position_jitter(0.2)) +
+  geom_violin(trim=FALSE) +
+  facet_wrap(~ year, nrow=8)
+```
+
+###Challenge
+Let's look at sex vs weight in a boxplot. But instead of all the species let's subset the data to only show sex (M & F) and species_id(DM, DO, DS). Let's also make each column have a different color. 
+
+```{r challenge }
+ggplot(subset(bio, species_id %in% c("DO", "DM", "DS") & sex %in% c("F", "M")),
+       aes(x = sex, y = weight,  color = interaction(species_id,sex))) + facet_wrap( ~ species_id) +
+       geom_point(alpha = 0.3, position = "jitter") +
+       geom_boxplot(alpha = 0, colour = "black")
+```
+
+###Bar Plots
+Create a barplots that shows the mean weight across species_id
+
+```{r bar1 }
+ggplot(bio, aes(x = species_id, y = weight)) + geom_bar(stat = "summary", fun.y = "mean")
+```
+
+Now create a barplots that shows hindfoot_length across species_id
+
+```{r bar 2 }
+ggplot(bio, aes(x = species_id, y = hindfoot_length)) + geom_bar(stat = "summary", fun.y = "mean")
+```
+
+
