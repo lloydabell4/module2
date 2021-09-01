@@ -10,6 +10,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(readr)
 ```
 ## *Learning Objectives*
 
@@ -68,7 +69,7 @@ We are going to use the friends_info dataset we used at the end of Rzero to get 
 First let's take a look at our friends_info. Note how many variables and observations are found in the dataset. 
 
 ```{r}
-friends_info <- read_csv("friends_info.csv")
+friends_info <- read_csv("Data/friends_info.csv")
 friends_info
 
 head(friends_info)
